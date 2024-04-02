@@ -1,131 +1,35 @@
 #include "binary_trees.h"
-
-levelorder_queue_t *create_node(binary_tree_t *node);
-void free_queue(levelorder_queue_t *head);
-void push(binary_tree_t *node, levelorder_queue_t *head,
-		levelorder_queue_t **tail);
-void pop(levelorder_queue_t **head);
-int binary_tree_is_complete(const binary_tree_t *tree);
+#include "limits.h"
 
 /**
- * create_node - Creates a new levelorder_queue_t node.
- * @node: The binary tree node for the new node to contain.
+ * is_bst_helper - Checks if a binary tree is a valid binary search tree.
+ * @tree: A pointer to the root node of the tree to check.
+ * @lo: The value of the smallest node visited thus far.
+ * @hi: The value of the largest node visited this far.
  *
- * Return: If an error occurs, NULL.
- *         Otherwise, a pointer to the new node.
+ * Return: If the tree is a valid BST, 1, otherwise, 0.
  */
-levelorder_queue_t *create_node(binary_tree_t *node)
+int is_bst_helper(const binary_tree_t *tree, int lo, int hi)
 {
-	levelorder_queue_t *new;
-
-	new = malloc(sizeof(levelorder_queue_t));
-	if (new == NULL)
-		return (NULL);
-
-	new->node = node;
-	new->next = NULL;
-
-	return (new);
-}
-
-/**
- * free_queue - Frees a levelorder_queue_t queue.
- * @head: A pointer to the head of the queue.
- */
-void free_queue(levelorder_queue_t *head)
-{
-	levelorder_queue_t *tmp;
-
-	while (head != NULL)
+	if (tree != NULL)
 	{
-		tmp = head->next;
-		free(head);
-		head = tmp;
-	}
-}
-
-/**
- * push - Pushes a node to the back of a levelorder_queue_t queue.
- * @node: The binary tree node to print and push.
- * @head: A double pointer to the head of the queue.
- * @tail: A double pointer to the tail of the queue.
- *
- * Description: Upon malloc failure, exits with a status code of 1.
- */
-void push(binary_tree_t *node, levelorder_queue_t *head,
-		levelorder_queue_t **tail)
-{
-	levelorder_queue_t *new;
-
-	new = create_node(node);
-	if (new == NULL)
-	{
-		free_queue(head);
-		exit(1);
-	}
-	(*tail)->next = new;
-	*tail = new;
-}
-
-/**
- * pop - Pops the head of a levelorder_queue_t queue.
- * @head: A double pointer to the head of the queue.
- */
-void pop(levelorder_queue_t **head)
-{
-	levelorder_queue_t *tmp;
-
-	tmp = (*head)->next;
-	free(*head);
-	*head = tmp;
-}
-
-/**
- * binary_tree_is_complete - Checks if a binary tree is complete.
- * @tree: A pointer to the root node of the tree to traverse.
- *
- * Return: If the tree is NULL or not complete, 0.
- *         Otherwise, 1.
- *
- * Description: Upon malloc failure, exits with a status code of 1.
- */
-int binary_tree_is_complete(const binary_tree_t *tree)
-{
-	levelorder_queue_t *head, *tail;
-	unsigned char flag = 0;
-
-	if (tree == NULL)
-		return (0);
-
-	head = tail = create_node((binary_tree_t *)tree);
-	if (head == NULL)
-		exit(1);
-
-	while (head != NULL)
-	{
-		if (head->node->left != NULL)
-		{
-			if (flag == 1)
-			{
-				free_queue(head);
-				return (0);
-			}
-			push(head->node->left, head, &tail);
-		}
-		else
-			flag = 1;
-		if (head->node->right != NULL)
-		{
-			if (flag == 1)
-			{
-				free_queue(head);
-				return (0);
-			}
-			push(head->node->right, head, &tail);
-		}
-		else
-			flag = 1;
-		pop(&head);
+		if (tree->n < lo || tree->n > hi)
+			return (0);
+		return (is_bst_helper(tree->left, lo, tree->n - 1) &&
+			is_bst_helper(tree->right, tree->n + 1, hi));
 	}
 	return (1);
+}
+
+/**
+ * binary_tree_is_bst - Checks if a binary tree is a valid binary search tree.
+ * @tree: A pointer to the root node of the tree to check.
+ *
+ * Return: 1 if tree is a valid BST, and 0 otherwise
+ */
+int binary_tree_is_bst(const binary_tree_t *tree)
+{
+	if (tree == NULL)
+		return (0);
+	return (is_bst_helper(tree, INT_MIN, INT_MAX));
 }
